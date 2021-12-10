@@ -58,7 +58,7 @@ use std::iter::Iterator;
 ///assert_eq!(buf[2], &4);
 ///assert_eq!(buf[3], &5);
 ///```
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RingBuffer<T, const SIZE : usize>
 {
     //storage is an array, because arrays _guarantee_ an initialized fixed size.
@@ -357,6 +357,7 @@ fn index_mut(&mut self, index :usize) -> &mut T {
 
 ///[`Iterator`] type returned by [`RingBuffer::iter()`]. Holds a reference to the ring buffer. See
 ///[`RingBuffer::iter()`] for an example.
+#[derive(Clone)]
 pub struct RingBufferIterator<'a, T, const SIZE :usize> {
     ring_buffer : &'a RingBuffer<T, SIZE>,
     index : usize,
