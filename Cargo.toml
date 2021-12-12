@@ -2,5 +2,11 @@
 name = "boxed_array_ringbuffer"
 version = "0.1.0"
 edition = "2021"
+authors = ["Andreas Grois"]
+rust-version = "1.56"
+description = "A ring buffer of fixed size, that uses a boxed array as storage, therefore avoiding re-allocations when converting from Vec or to VecDeque"
+repository = "https://github.com/soulsource/boxed_array_ringbuffer"
+license = "MIT"
+keywords = ["ringbuffer", "fixed-size"]
+categories = ["data-structures"]
 
-[dependencies]

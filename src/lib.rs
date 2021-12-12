@@ -10,6 +10,77 @@
 //!Since the ring buffer has always a guaranteed number of elements, it must be initialized, either
 //!from an iterator, a boxed slice (most collections can convert into a boxed slice at very low
 //!cost), a [`Vec`], or at a value that implements [`Copy`][std::marker::Copy].
+//!
+//!# Examples
+//!
+//!A new ring buffer can only be created from a [`Vec`] or a [boxed][std::boxed::Box] [`slice`]
+//!of the correct size (using [`TryFrom`][std::convert::TryFrom]/[`TryInto`][std::convert::TryInto]),
+//!by taking the correct size from an iterator (using [`new()`][RingBuffer::new]),
+//!or by initializing all entries in the ring buffer to the same [`Copy`][core::marker::Copy]able
+//!value (using [`new_copy()`][RingBuffer::new_copy]).
+//!```
+//! # use boxed_array_ringbuffer::RingBuffer;
+//!let buf : RingBuffer<_, 4> = vec![42,37,23,12].try_into().expect("Works, size matches.");
+//!let wrong_size : Result<RingBuffer<_,3>, Vec<u8>> = vec![42,37,23,12].try_into();
+//!assert!(wrong_size.is_err());
+//!
+//!let buf2 : RingBuffer<_,3> = RingBuffer::new(vec![42,37,23,12].into_iter())
+//!    .expect("works, because iterator has enough elements - use by_ref() on iterator if \
+//!    you need the remaining elements still.");
+//!let not_enough : Result<RingBuffer<_,5>,_> = RingBuffer::new(vec![42,37,23,12].into_iter());
+//!assert_eq!(not_enough.unwrap_err()[2],23);
+//!
+//!let buf3 : RingBuffer<_,3> = RingBuffer::new_copy(42);
+//!assert_eq!(buf3[2],42);
+//!```
+//!
+//!As you have seen above, accessing upcoming elements can be done with the [`Index`] or
+//![`IndexMut`] syntax. Howver, if you are not absolutely certain that your index is within the
+//!size of the ring buffer, you can also use the [`get()`][RingBuffer::get] or
+//![`get_mut()`][RingBuffer::get_mut] methods. The indices are always relevant to the current
+//!position within the RingBuffer.
+//!```
+//! # use boxed_array_ringbuffer::RingBuffer;
+//!let buf : RingBuffer<_, 4> = vec![42,37,23,12].try_into().expect("Works, size matches.");
+//!assert_eq!(buf[3], 12);
+//!assert_eq!(buf.get(2), Some(&23));
+//!let mut buf = buf;
+//!assert_eq!(buf.get_mut(4), None);
+//!let (buf, forty_two) = buf.push_pop(6);
+//!assert_eq!(buf[3],6);
+//!```
+//!
+//!In order to add a new element to the buffer and remove the oldest element from the buffer (after
+//!all, the size of the RingBuffer has to be constant), you can use the
+//![`push_pop()`][RingBuffer::push_pop()] method:
+//!```
+//! # use boxed_array_ringbuffer::RingBuffer;
+//!let buf : RingBuffer<_, 4> = vec![42,37,23,12].try_into().expect("Works, size matches.");
+//!let (buf, forty_two) = buf.push_pop(6);
+//!assert_eq!(forty_two, 42);
+//!assert_eq!(buf[0],37);
+//!assert_eq!(buf[3],6);
+//!```
+//!
+//!To iterate over the upcoming elements, you can either use the [`iter()`][RingBuffer::iter] or
+//!the [`into_iter()][RingBuffer::into_iter] methods, the latter if you want the iterator to take
+//!ownership of the data of the ring buffer.
+//!```
+//! # use boxed_array_ringbuffer::RingBuffer;
+//!let buf : RingBuffer<_, 4> = vec![42,37,23,12].try_into().expect("Works, size matches.");
+//!assert!(buf.iter().eq(vec![42,37,23,12].iter()));
+//!assert!(buf.into_iter().eq(vec![42,37,23,12].into_iter()));
+//!```
+//!
+//!And last, but not least, once you are done utilizing the ring buffer's guarantee that the amount
+//!of items is constant, you can always convert it to a [`VecDeque`][`std::collections::VecDeque`]
+//!without needing a reallocation.
+//!```
+//! # use boxed_array_ringbuffer::RingBuffer;
+//!let buf : RingBuffer<_, 4> = vec![42,37,23,12].try_into().expect("Works, size matches.");
+//!let (buf, _forty_two) = buf.push_pop(6);
+//!let deque : std::collections::VecDeque<_> = buf.into();
+//!assert!(deque.into_iter().eq(vec![37,23,12,6].into_iter()));
 
 use std::ops::{Index, IndexMut};
 use std::iter::Iterator;
