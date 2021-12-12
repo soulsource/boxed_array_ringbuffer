@@ -37,8 +37,8 @@
 //!As you have seen above, accessing upcoming elements can be done with the [`Index`] or
 //![`IndexMut`] syntax. Howver, if you are not absolutely certain that your index is within the
 //!size of the ring buffer, you can also use the [`get()`][RingBuffer::get] or
-//![`get_mut()`][RingBuffer::get_mut] methods. The indices are always relevant to the current
-//!position within the RingBuffer.
+//![`get_mut()`][RingBuffer::get_mut] methods. The indices are always relative to the current
+//!position within the `RingBuffer`.
 //!```
 //! # use boxed_array_ringbuffer::RingBuffer;
 //!let buf : RingBuffer<_, 4> = vec![42,37,23,12].try_into().expect("Works, size matches.");
@@ -63,7 +63,7 @@
 //!```
 //!
 //!To iterate over the upcoming elements, you can either use the [`iter()`][RingBuffer::iter] or
-//!the [`into_iter()][RingBuffer::into_iter] methods, the latter if you want the iterator to take
+//!the [`into_iter()`][RingBuffer::into_iter] methods, the latter if you want the iterator to take
 //!ownership of the data of the ring buffer.
 //!```
 //! # use boxed_array_ringbuffer::RingBuffer;
